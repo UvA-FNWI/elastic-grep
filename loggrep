@@ -21,20 +21,10 @@ search_index: str = "filebeat*"
 def run_query(and_operator: bool, verbose: bool, words: List[str]):
     operator: str = "AND" if and_operator else "OR"
     es = Elasticsearch(elastic_servers)
-    # trace_filter = [{"terms": {"host.keyword": pdu_names}}, {"term": {"collectd_type.keyword": collectd_type}}]
-    # end_time = datetime.datetime.now()
-    # start_time = end_time - datetime.timedelta(hours=hours)
-    # trace_filter.append(
-    #     {
-    #         "range": {
-    #             "@timestamp": {
-    #                 "gte": start_time.isoformat(),
-    #                 "lte": end_time.isoformat(),
-    #                 "format": "strict_date_optional_time"
-    #             }
-    #         }
-    #     })
-    query = {
+    hours = 24*2
+    end_time = datetime.datetime.now()
+    start_time = end_time - datetime.timedelta(hours=hours)
+    query_old = {
         "match": {
             "message": {
                 "query": " ".join(words),
@@ -44,10 +34,30 @@ def run_query(and_operator: bool, verbose: bool, words: List[str]):
             }
         }
     }
+    query = {
+        "bool": {
+             "must": [
+                 {
+                     "range": {
+                         "@timestamp": {
+                             "gte": start_time.isoformat(),
+                             "lte": end_time.isoformat(),
+                             "format": "strict_date_optional_time"
+                         }
+                     }
+                 },
+                {
+                    "simple_query_string": {
+                        "query": " ".join(words)
+                    }
+                }
+             ]
+        }
+    }
     index = search_index
     if verbose:
         print("index=", index, "query=", query)
-    res = es.search(index=index, query=query, size=100)
+    res = es.search(index=index, query=query, size=1000, request_timeout=100)
     matches = res['hits']['hits']
     return matches
 
