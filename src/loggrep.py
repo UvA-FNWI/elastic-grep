@@ -1,24 +1,20 @@
-from abc import ABC, abstractmethod
+#!/bin/env python3
 import sys
-import inspect
-import os
-import dateutil
 import datetime
 from elasticsearch7 import Elasticsearch
 
-from typing import Dict, Any, Tuple, List
+from typing import Dict, Any, List
 
 # TODO: put this in a config file
 elastic_servers = [
-    {'host': 'elastic-data0.science.uva.nl', 'port': 9200},
-    {'host': 'elastic-data1.science.uva.nl', 'port': 9200},
+    {'host': 'localhost', 'port': 9200},
 ]
 
 
 search_index: str = "filebeat*"
 
 
-def run_query(and_operator: bool, verbose: bool, words: List[str]):
+def run_query(and_operator: bool, verbose: bool, words: List[str]) -> List[Dict[str, Any]]:
     operator: str = "AND" if and_operator else "OR"
     es = Elasticsearch(elastic_servers)
     hours = 24*2
@@ -36,22 +32,22 @@ def run_query(and_operator: bool, verbose: bool, words: List[str]):
     }
     query = {
         "bool": {
-             "must": [
-                 {
-                     "range": {
-                         "@timestamp": {
-                             "gte": start_time.isoformat(),
-                             "lte": end_time.isoformat(),
-                             "format": "strict_date_optional_time"
-                         }
-                     }
-                 },
+            "must": [
+                {
+                    "range": {
+                        "@timestamp": {
+                            "gte": start_time.isoformat(),
+                            "lte": end_time.isoformat(),
+                            "format": "strict_date_optional_time"
+                        }
+                    }
+                },
                 {
                     "simple_query_string": {
                         "query": " ".join(words)
                     }
                 }
-             ]
+            ]
         }
     }
     index = search_index
@@ -61,12 +57,14 @@ def run_query(and_operator: bool, verbose: bool, words: List[str]):
     matches = res['hits']['hits']
     return matches
 
+
 def print_results(results: List[Dict[str, Any]]) -> None:
     for result in results:
         core = result["_source"]
         host = core["host"]["name"]
         path = core["log"]["file"]["path"]
         print(f'{host}: {path}: {core["message"]}')
+
 
 def print_help() -> None:
     print("Search the logfiles in elasticsearch for words in log messages")
@@ -89,33 +87,41 @@ def report_commandline_error(msg: str) -> None:
     sys.exit(1)
 
 
-query_words = []
-recognize_options = True
-verbose = False
-and_operator = False
-
-for arg in sys.argv[1:]:
-    if recognize_options:
-        if arg == '-h':
-            print_help()
-            sys.exit(0)
-        elif arg == '-a':
-            and_operator = True
-        elif arg == '-e':
-            recognize_options = False
-        elif arg == '-v':
-            verbose = True
-        else:
-            if arg[0] == '-':
-                report_commandline_error(f"Unknown option '{arg}'")
+def main():
+    query_words = []
+    recognize_options = True
+    verbose = False
+    and_operator = False
+    for arg in sys.argv[1:]:
+        if recognize_options:
+            if arg == '-h':
+                print_help()
+                sys.exit(0)
+            elif arg == '-a':
+                and_operator = True
+            elif arg == '-e':
+                recognize_options = False
+            elif arg == '-v':
+                verbose = True
             else:
-                query_words.append(arg)
-    else:
-        # Anything is a query pattern
-        query_words.append(arg)
+                if arg[0] == '-':
+                    report_commandline_error(f"Unknown option '{arg}'")
+                else:
+                    query_words.append(arg)
+        else:
+            # Anything is a query pattern
+            query_words.append(arg)
+    if len(query_words) == 0:
+        report_commandline_error("There is no pattern to search for")
+    matches: List[Dict[str, Any]] = run_query(and_operator, verbose, query_words)
+    print_results(matches)
 
-if len(query_words) == 0:
-    report_commandline_error("There is no pattern to search for")
-matches = run_query(and_operator, verbose, query_words)
+# TODO: allow time interval to be specified
+# TODO: allow indices to be specified
+# TODO: allow filtering on host
+# TODO: allow filtering on log file name
+# TODO: document query behavior properly
 
-print_results(matches)
+
+if __name__ == "__main__":
+    main()
