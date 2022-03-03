@@ -7,18 +7,19 @@ stored in ElasticSearch.
 
 ## Installation
 
-To install, simply do:
-```bash
-pip install elastic_grep
+Install the latest release from PyPI using pip3 (recommended) or pip:
+
+```shell
+pip3 install elastic_grep
+```
+or else:
+```shell
+python3 -m pip install -U elastic_grep
 ```
 
 
 ## Usage
-
-For example:
-```bash
-$pip install -e .[dev]
-```
+Run `elastic_grep -h` to see usage.
 
 # Developing elastic_grep
 

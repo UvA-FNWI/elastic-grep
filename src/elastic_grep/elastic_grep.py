@@ -67,14 +67,18 @@ def print_results(results: List[Dict[str, Any]]) -> None:
 
 
 def print_help() -> None:
+    """Print the help text"""
     print("Search the logfiles in elasticsearch for words in log messages")
     print()
     print("Usage: elastic_grep [<option>...<option>] <word>...<word>")
     print("Where <option> is one of:")
-    print("  -a\t\tSearch for log entries that match ALL words (default: ANY word)")
-    print("  -e\t\tAll subsequent words are patterns, not patterns")
-    print("  -h\t\tShow this help text")
-    print("  -v\t\tIncrease the verbosity of the output")
+    print("-a\t\tSearch for elasticsearch entries that match ALL words (default: ANY word)")
+    print("-e\t\tAll subsequent words are patterns, not patterns")
+    print("-h\t\tShow this help text")
+    print("--host <host>\tSpecify the hostname or IP address of the elasticsearch server to talk to (default: 'localhost'")
+    print("--index <index>\tSpecify the index to search (default: 'filebeat*'")
+    print("--port <port>\tSpecify the port of the elasticsearch server to talk to (default: 9200)")
+    print("-v\t\tIncrease the verbosity of the output")
     print("At least one word should be given. If more than one word is given, all entries")
     print("that contain at least one of these words somewhere in the message are shown.")
     print("With the -a option only entries are shown that contain ALL words somewhere in")
@@ -109,7 +113,7 @@ def main():
                 else:
                     query_words.append(arg)
         else:
-            # Anything is a query pattern
+            # Anything else is a query pattern
             query_words.append(arg)
     if len(query_words) == 0:
         report_commandline_error("There is no pattern to search for")
