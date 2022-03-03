@@ -69,7 +69,7 @@ def print_results(results: List[Dict[str, Any]]) -> None:
 def print_help() -> None:
     print("Search the logfiles in elasticsearch for words in log messages")
     print()
-    print("Usage: loggrep [<option>...<option>] <word>...<word>")
+    print("Usage: elastic_grep [<option>...<option>] <word>...<word>")
     print("Where <option> is one of:")
     print("  -a\t\tSearch for log entries that match ALL words (default: ANY word)")
     print("  -e\t\tAll subsequent words are patterns, not patterns")

@@ -1,0 +1,46 @@
+[project]
+name = "elastic_grep"
+version = "0.0.1"
+description = "Grep an ElasticSearch database"
+readme = "README.md"
+requires-python = ">=3.1"
+license = { file = "LICENSE" }
+authors = [
+    { name = "Kees van Reeuwijk", email = "C.vanReeuwijk@uva.nl" }
+]
+keywords = ["elasticsearch", "grep", "search"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: BSD License",
+    "Topic :: System :: Logging",
+    "Typing :: Typed",
+    "Operating System :: OS Independent"
+]
+dependencies = [
+    "elasticsearch7"
+]
+
+[project.urls]
+repository = "https://github.com/UvA-FNWI/elastic-grep"
+
+[project.scripts]
+elastic_grep = "elastic_grep:main"
+
+
+[project.optional-dependencies]
+dev = [
+    "tox"
+]
+tests = [
+    "pytest"
+]
+
+[build-system]
+requires = [
+    "setuptools>=42",
+    "wheel"
+]
+build-backend = "setuptools.build_meta"
