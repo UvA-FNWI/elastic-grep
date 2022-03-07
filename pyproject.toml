@@ -19,9 +19,6 @@ classifiers = [
     "Typing :: Typed",
     "Operating System :: OS Independent"
 ]
-dependencies = [
-    "elasticsearch7"
-]
 
 [project.urls]
 repository = "https://github.com/UvA-FNWI/elastic-grep"
